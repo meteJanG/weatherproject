@@ -1,0 +1,213 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Climora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'homepage.css' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#4A90E2">
+    <link rel="apple-touch-icon" href="{% static 'logologo.png' %}">
+</head>
+
+<body id="dynamic-bg" class="{% if hava.precipitation_chance > 50 %}rainy{% endif %}"
+    style="background-size: cover; background-position: center; background-repeat: no-repeat; min-height: 100vh; transition: background 1s ease-in-out;">
+
+    <button id="pwa-indir-buton" class="pwabutton" style="display: none;">
+        Mobil Uygulamayı İndir
+    </button>
+
+    <div class="rain-container">
+        <div class="rain front-row"></div>
+        <div class="rain back-row"></div>
+    </div>
+
+    <div class="logo-container">
+        <img src="{% static 'logologo.png' %}" alt="SkySmart Logo" class="site-logo">
+    </div>
+
+    <div class="search-container">
+        <form method="GET" action="/">
+            <input type="text" name="city" placeholder="Şehir aratınız..." value="{{ aranan_sehir }}">
+            <button type="submit" class="search-btn">Ara</button>
+        </form>
+    </div>
+
+    <div class="dashboard-wrapper">
+        {% if hava %}
+        <div class="bento-grid">
+
+            <div class="box main-box">
+                <div class="main-header">
+                    <h2 class="city-name">{{ aranan_sehir }}</h2>
+                    <h1 class="temperature">{{ hava.temperature|floatformat:1 }}°C</h1>
+                </div>
+                <div class="ai-comment-section">
+                    {% if ai_yorumu %}
+                    <p class="ai-comment">"{{ ai_yorumu }}"</p>
+                    {% else %}
+                    <p class="ai-comment">"Hava durumu yorumu yükleniyor..."</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="box detail-box">
+                <span class="label">Nem</span>
+                <span class="value">%{{ hava.humidity|floatformat:0 }}</span>
+            </div>
+            <div class="box detail-box" style="position: relative;">
+                <span class="badge-yeni">YENİ</span>
+                <button class="help-btn" id="helpBtn">?</button>
+                <span class="label">KIYAFET ÖNERİSİ AL</span>
+                <button class="button" id="openPopupBtn">👔</button>
+            </div>
+            <div class="box detail-box">
+                <span class="label">Konfor Puani</span>
+                <span class="value">{{ konfor_puani }} / 100</span>
+            </div>
+            <div class="box detail-box">
+                <span class="label">Hissedilen</span>
+                <span class="value">{{ hava.temperature|floatformat:1 }}°C</span>
+            </div>
+
+            <div class="box side-box">
+                <h3>Önümüzdeki Saatler</h3>
+                <div class="hourly-forecast">
+                    {% for saat in gelecek_saatler %}
+                    <div class="hour-item">
+                        <span class="hour-label">{{ saat.forecast_time|date:"H:i" }}</span>
+                        <strong class="hour-temp">{{ saat.temperature|floatformat:0 }}°C</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <h3 class="playlist-heading">Bu havada dinlenecek Track</h3>
+
+                <div class="spotify-widget">
+                    {% if sarki %}
+                    <img src="{{ sarki.image }}" class="spotify-cover" alt="Kapak">
+                    <p class="spotify-title">{{ sarki.name }} - {{ sarki.artist }}</p>
+                    <a href="{{ sarki.url }}" target="_blank" class="spotify-link-btn">Spotify'da Dinle</a>
+                    {% else %}
+                    <p>Şarkı yüklenemedi.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+        {% else %}
+        <div style="color: white; text-align: center; margin-top: 50px;">
+            <h2>Veri bulunamadı. Lütfen başka bir şehir arayın veya API bağlantınızı kontrol edin.</h2>
+        </div>
+        {% endif %}
+    </div>
+    <div class="popup-overlay" id="outfitPopup">
+        <div class="popup-content">
+            <button class="close-btn" id="closePopupBtn">&times;</button>
+            <h2>Günün Kıyafet Asistanı</h2>
+            <p class="popup-subtitle">Hava durumuna uygun AI kombini analizi</p>
+
+            <div class="upload-container" id="uploadContainer">
+                <input type="file" id="outfitInput" accept="image/*" capture="environment" style="display: none;">
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                    <span class="plus-icon">＋</span>
+                    <p>Kıyafetinin Fotoğrafını Çek / Yükle</p>
+                </div>
+                <div class="preview-container" id="previewContainer" style="display: none;">
+                    <img id="outfitPreview" alt="Kıyafet Önizlemesi">
+                    <button type="button" id="retakeBtn" class="retake-btn">Yeniden Çek</button>
+                </div>
+            </div>
+
+            <button type="button" class="analyze-btn" id="analyzeBtn" disabled>Kıyafeti Kaydet</button>
+        </div>
+    </div>
+
+    <!-- 2. SORU İŞARETİ AÇIKLAMA POP-UP'I -->
+    <div class="popup-overlay" id="helpPopup">
+        <div class="popup-content">
+            <button class="close-btn" id="closeHelpPopupBtn">&times;</button>
+            <h2>💡 Bu Özellik Ne İşe Yarar?</h2>
+            <p>Kıyafetinin fotoğrafını çekerek veya yükleyerek, o anki hava durumuna uygun olup olmadığını yapay zekaya
+                analiz ettirebilirsin!</p>
+
+            <div class="dont-show-container">
+                <label>
+                    <input type="checkbox" id="dontShowCheckbox"> Bir daha gösterme
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DOSYASI EN ALTA TAŞINDI -->
+    <script src="{% static 'script.js' %}"></script>
+
+    <!-- Diğer inline scriptler -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (document.body.classList.contains('rainy')) {
+                var frontRow = document.querySelector('.rain.front-row');
+                var backRow = document.querySelector('.rain.back-row');
+                var increment = 0;
+                var drops = "";
+                var backDrops = "";
+
+                while (increment < 100) {
+                    var randoHundo = (Math.floor(Math.random() * (98 - 1 + 1) + 1));
+                    var randoFiver = (Math.floor(Math.random() * (5 - 2 + 1) + 2));
+                    increment += randoFiver;
+
+                    var styleStr = 'left: ' + increment + '%; bottom: ' + (randoFiver + randoFiver - 1 + 100) + '%; animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;';
+                    var dropHtml = '<div class="drop" style="' + styleStr + '"><div class="stem" style="animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"></div><div class="splat" style="animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"></div></div>';
+
+                    drops += dropHtml;
+                    backDrops += dropHtml;
+                }
+                if (frontRow) frontRow.innerHTML = drops;
+                if (backRow) backRow.innerHTML = backDrops;
+            }
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register("{% static 'sw.js' %}")
+                .then((reg) => console.log('PWA Service Worker Başarılı!', reg))
+                .catch((err) => console.log('PWA Hatası:', err));
+        }
+        let kurulumEkrani;
+        const indirButonu = document.getElementById('pwa-indir-buton');
+
+        window.addEventListener('beforeinstallprompt', (olay) => {
+            olay.preventDefault();
+            kurulumEkrani = olay;
+            indirButonu.style.display = 'inline-block';
+        });
+
+        indirButonu.addEventListener('click', async () => {
+            if (kurulumEkrani !== null) {
+                kurulumEkrani.prompt();
+                const sonuc = await kurulumEkrani.userChoice;
+                if (sonuc.outcome === 'accepted') {
+                    indirButonu.style.display = 'none';
+                }
+                kurulumEkrani = null;
+            }
+        });
+
+        function setWeatherBackground() {
+            const now = new Date();
+            let hour = now.getHours();
+            let formattedHour = hour.toString().padStart(2, '0');
+            const imagePath = `/static/weatherfotos/${formattedHour}.png`;
+            const bgElement = document.getElementById('dynamic-bg');
+            if (bgElement) {
+                bgElement.style.backgroundImage = `url('${imagePath}')`;
+            }
+        }
+        setWeatherBackground();
+        setInterval(setWeatherBackground, 900000);
+    </script>
+</body>
+
+</html>
