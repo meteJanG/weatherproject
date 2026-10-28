@@ -1,0 +1,619 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    /* Fontu Poppins yaptık */
+}
+
+
+body {
+    background-color: #111;
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    color: white;
+}
+.pwabutton{
+    position: absolute;
+    top: 30px;    
+    right: 40px;  
+    z-index: 1000; 
+    padding: 12px 24px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #4A90E2;
+    color: white;
+    border: none;
+    outline: none;/* bu none olan kodlar djangonun kendi koyduğu renk ve dokunuşları silmemizi sağlıyor bunları kullanmak önemli */
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+
+/* Arka planı hafif karartan katman (başlangıçta gizli) */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Arkadaki siteyi karartır */
+    backdrop-filter: blur(5px);      /* Arkaya hafif bulanıklık verir */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    
+    /* Başlangıçta gizli olması için: */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.popup-content {
+    background: rgba(30, 35, 45, 0.75); /* Sitedeki diğer kutuların arka plan tonu */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Hafif şeffaf kenarlık */
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    width: 400px;
+    max-width: 90%;
+    border-radius: 20px;
+    color: #fff;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    
+    /* Açılış animasyonu için küçük bir efekt */
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+/* Sağ Üstteki Çarpı Butonu */
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+.popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-overlay.active .popup-content {
+    transform: translateY(0);
+}
+/* Pop-up İç Tasarım Stilleri */
+.popup-content h2 {
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.popup-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-bottom: 20px;
+}
+
+.upload-container {
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 20px;
+    position: relative;
+    min-height: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.upload-container:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.upload-placeholder .plus-icon {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 10px;
+    color: #4A90E2;
+}
+
+.upload-placeholder p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.preview-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.preview-container img {
+    max-height: 180px;
+    max-width: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.retake-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.retake-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.analyze-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.3s, transform 0.2s;
+}
+
+.analyze-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.analyze-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+/* Sol Üst "YENİ" Rozeti */
+.badge-yeni {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Sağ Üst Soru İşareti Butonu */
+.help-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 5px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.help-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* "Bir daha gösterme" Alanı */
+.dont-show-container {
+    margin-top: 20px;
+    text-align: left;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.dont-show-container label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+/* YAĞMUR KONTEYNERİ (Kutuların arkasında duran sabit katman) */
+.rain-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    /* Tıklamaları engellemesin */
+}
+
+body.rainy .rain-container {
+    display: block;
+    /* Sadece yağmurluysa görünür! */
+}
+
+.rain {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.rain.back-row {
+    bottom: 60px;
+    opacity: 0.5;
+}
+
+.drop {
+    position: absolute;
+    bottom: 100%;
+    width: 15px;
+    height: 120px;
+    pointer-events: none;
+    animation: drop 0.5s linear infinite;
+}
+
+@keyframes drop {
+    0% {
+        transform: translateY(0vh);
+    }
+
+    75% {
+        transform: translateY(90vh);
+    }
+
+    100% {
+        transform: translateY(90vh);
+    }
+}
+
+.stem {
+    width: 1px;
+    height: 60%;
+    margin-left: 7px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.25));
+    animation: stem 0.5s linear infinite;
+}
+
+@keyframes stem {
+
+    0%,
+    65% {
+        opacity: 1;
+    }
+
+    75%,
+    100% {
+        opacity: 0;
+    }
+}
+
+.splat {
+    width: 15px;
+    height: 10px;
+    border-top: 2px dotted rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    opacity: 1;
+    transform: scale(0);
+    animation: splat 0.5s linear infinite;
+}
+
+@keyframes splat {
+
+    0%,
+    80% {
+        opacity: 1;
+        transform: scale(0);
+    }
+
+    90% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+.search-container {
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.search-container form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-container input {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    outline: none;
+}
+
+.search-btn {
+    padding: 12px 25px;
+    border-radius: 30px;
+    border: none;
+    background: white;
+    color: #18085c;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Dashboard Yerleşimi */
+.dashboard-wrapper {
+    width: 100%;
+    max-width: 1200px;
+}
+
+.bento-grid {
+    display: grid;
+    /* 1. Kolon (Nem/Konfor), 2. Kolon (Rüzgar/Hissedilen), 3. Kolon (Sağ Kutu) */
+    grid-template-columns: 1fr 1fr 1.2fr;
+
+    /* 1. Satır otomatik, 2. ve 3. satırlar birbirine tamamen eşit (1fr) olacak */
+    grid-template-rows: auto 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+}
+
+/* Glassmorphism Kutular */
+.box {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.main-box {
+    grid-column: 1 / 3;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.city-name {
+    font-size: 2.5rem;
+    font-weight: 800;
+}
+
+.temperature {
+    font-size: 4.5rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.ai-comment-section {
+    margin-top: 20px;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    border-radius: 15px;
+    border-left: 5px solid #f87171;
+}
+
+.ai-comment {
+    font-style: italic;
+    line-height: 1.6;
+    font-weight: 300;
+}
+
+.detail-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+}
+
+.label {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 5px;
+}
+
+.value {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+.button {
+    font-size: 3rem; 
+    background: none !important;
+    border: none !important;
+    cursor: pointer;
+    padding: 0;
+    outline: none;
+}
+
+
+.side-box {
+    grid-column: 3;
+    grid-row: 1 / 4;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Aşağıdaki kutularla aynı hizada bitmesi için tam uzatıyoruz */
+}
+
+.side-box h3 {
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.hour-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.spotify-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.spotify-widget:hover {
+    transform: translateY(-5px);
+    /* Üzerine gelince hafif kalkma efekti */
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.spotify-cover {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.spotify-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.spotify-link-btn {
+    background: #1DB954;
+    color: white;
+    padding: 10px 30px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    width: 100%;
+    display: inline-block;
+}
+
+.spotify-link-btn:hover {
+    background: #1ed760;
+    transform: scale(1.05);
+}
+
+.playlist-heading {
+    margin-top: 30px;
+    /* Üstteki saatlik tahminlerle arayı açar */
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: left;
+    /* Çizimindeki gibi sola yaslı veya center yapabilirsin */
+}
+
+.logo-container {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    z-index: 100;
+}
+
+.site-logo {
+    width: 65px;
+    height: 65px;
+    object-fit: cover;
+    border-radius: 14px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.site-logo:hover {
+    transform: scale(1.08);
+}
+
+
+
+.weather-icon {
+    font-size: 2.5rem; /* İkonun büyüklüğü */
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+}
+
+.condition-text {
+    font-weight: 300;
+    text-transform: capitalize;
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .bento-grid {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main-box {
+        grid-column: unset;
+    }
+
+    .side-box {
+        grid-column: unset;
+        grid-row: unset;
+    }
+
+    .bento-grid > .box {
+        width: 100%;
+    }
+}
