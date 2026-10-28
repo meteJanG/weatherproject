@@ -2,7 +2,7 @@
 import os
 import requests
 import pandas as pd
-import google.generativeai as genai
+from google import genai
 from datetime import datetime, timezone as dt_timezone
 from django.utils import timezone
 from .models import HourlyForecast, MergedForecast
