@@ -6,6 +6,7 @@ from google import genai
 from datetime import datetime, timezone as dt_timezone
 from django.utils import timezone
 from .models import HourlyForecast, MergedForecast
+from google.genai.errors import APIError
 
 def hesapla_konfor(sicaklik, nem, ruzgar):
     puan = 100
@@ -261,23 +262,27 @@ def get_ai_comment(temperature, humidity, precipitation):
     if not api_key:
         return "AI yorumu için API anahtarı bulunamadı."
     
-    client = genai.Client(api_key=api_key)
-    prompt = f"""
-    Şu anki hava durumu verileri:
-    - Sıcaklık: {temperature}°C
-    - Nem: %{humidity}
-    - Yağış İhtimali: %{precipitation}
+    try:
+        client = genai.Client(api_key=api_key)
+        prompt = f"""
+        Şu anki hava durumu verileri:
+        - Sıcaklık: {temperature}°C
+        - Nem: %{humidity}
+        - Yağış İhtimali: %{precipitation}
+        
+        Lütfen bu havaya göre bir insana 2-3 cümlelik samimi, motive edici bir yorum yap. 
+        Aynı zamanda bu havada ne giyilmesi gerektiğiyle ilgili (örneğin: "Bugün hafif bir hırka yeterli olur" gibi) çok kısa bir kıyafet önerisi ekle. 
+        Yanıtın toplamda 40 kelimeyi geçmesin.
+        """
     
-    Lütfen bu havaya göre bir insana 2-3 cümlelik samimi, motive edici bir yorum yap. 
-    Aynı zamanda bu havada ne giyilmesi gerektiğiyle ilgili (örneğin: "Bugün hafif bir hırka yeterli olur" gibi) çok kısa bir kıyafet önerisi ekle. 
-    Yanıtın toplamda 40 kelimeyi geçmesin.
-    """
-    
-    response = client.models.generate_content(
-        model="gemini-3.8-flash",
-        contents=prompt,
-    )
-    return response.text
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+        )
+        return response.text
+    except Exception as e:
+        # Sunucu yoğun veya hata verirse site çökmesin, geçici bir metin dönsün
+        return "Şu an hava durumu için yapay zeka yorumu oluşturulamıyor, lütfen biraz sonra tekrar deneyin."
 
 
     
