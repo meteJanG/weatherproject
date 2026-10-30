@@ -257,15 +257,11 @@ def save_merged_data(city_name):
 
 
 def get_ai_comment(temperature, humidity, precipitation):
-    # API anahtarını çek ve Gemini'yi başlat
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         return "AI yorumu için API anahtarı bulunamadı."
     
-    genai.configure(api_key=api_key)
-    
-    model = genai.GenerativeModel('gemini-3.8-flash')
-    
+    client = genai.Client(api_key=api_key)
     prompt = f"""
     Şu anki hava durumu verileri:
     - Sıcaklık: {temperature}°C
@@ -277,12 +273,11 @@ def get_ai_comment(temperature, humidity, precipitation):
     Yanıtın toplamda 40 kelimeyi geçmesin.
     """
     
-    try:
-        response = model.generate_content(prompt)
-        return response.text.strip()
-    except Exception as e:
-        print("Gemini API Hatası:", e)
-        return "Şu an hava durumu yorumu alınamıyor."
+    response = client.models.generate_content(
+        model="gemini-3.8-flash",
+        contents=prompt,
+    )
+    return response.text
 
 
     
