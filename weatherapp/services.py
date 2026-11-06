@@ -258,6 +258,8 @@ def save_merged_data(city_name):
 
 
 def get_ai_comment(temperature, humidity, precipitation):
+    print("API KEY VAR MI:", bool(api_key))
+    print("GEMINI FONKSİYONU ÇALIŞTI")
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         return "AI yorumu için API anahtarı bulunamadı."
@@ -281,8 +283,8 @@ def get_ai_comment(temperature, humidity, precipitation):
         )
         return response.text
     except Exception as e:
-        # Sunucu yoğun veya hata verirse site çökmesin, geçici bir metin dönsün
-        return "Şu an hava durumu için yapay zeka yorumu oluşturulamıyor, lütfen biraz sonra tekrar deneyin."
+        print("GEMINI HATASI:", repr(e))
+        return f"Gemini hatası: {str(e)}"
 
 
     
