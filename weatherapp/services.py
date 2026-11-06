@@ -276,7 +276,7 @@ def get_ai_comment(temperature, humidity, precipitation):
         """
     
         response = client.models.generate_content(
-            model="gemini-3.1-flash-lite",
+            model="gemini-3.5-flash",
             contents=prompt,
         )
         return response.text
