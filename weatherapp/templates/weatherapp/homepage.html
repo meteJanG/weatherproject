@@ -199,7 +199,7 @@
             const now = new Date();
             let hour = now.getHours();
             let formattedHour = hour.toString().padStart(2, '0');
-            const imagePath = "{% static 'weatherfotos/' %}" + formattedHour + ".png";
+            const imagePath = "{% static 'weatherfotos/' %}" + formattedHour + ".jpeg";
             const bgElement = document.getElementById('dynamic-bg');
             if (bgElement) {
                 bgElement.style.backgroundImage = `url('${imagePath}')`;
