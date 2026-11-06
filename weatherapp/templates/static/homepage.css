@@ -6,6 +6,14 @@
     /* Fontu Poppins yaptık */
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh; /* Ekran yüksekliğini tam kapla */
+    overflow: hidden; /* Scroll bar'ı gizle */
+    box-sizing: border-box;
+}
 
 body {
     background-color: #111;
