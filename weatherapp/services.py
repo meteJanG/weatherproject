@@ -258,9 +258,11 @@ def save_merged_data(city_name):
 
 
 def get_ai_comment(temperature, humidity, precipitation):
+    
+    api_key = os.getenv("GEMINI_API_KEY")
     print("API KEY VAR MI:", bool(api_key))
     print("GEMINI FONKSİYONU ÇALIŞTI")
-    api_key = os.getenv("GEMINI_API_KEY")
+    
     if not api_key:
         return "AI yorumu için API anahtarı bulunamadı."
     
