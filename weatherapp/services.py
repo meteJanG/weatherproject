@@ -1,4 +1,4 @@
-
+import json
 import os
 import requests
 import pandas as pd
@@ -258,16 +258,21 @@ def save_merged_data(city_name):
 
 
 def get_ai_comment(temperature, humidity, precipitation):
-    
-    api_key = os.getenv("GEMINI_API_KEY")
-    print("API KEY VAR MI:", bool(api_key))
-    print("GEMINI FONKSİYONU ÇALIŞTI")
+    # Anahtarın adını OpenRouter olarak değiştirdik
+    api_key = os.getenv("OPENROUTER_API_KEY")
     
     if not api_key:
-        return "AI yorumu için API anahtarı bulunamadı."
+        return "AI yorumu için OpenRouter API anahtarı bulunamadı."
     
     try:
-        client = genai.Client(api_key=api_key)
+        # OpenRouter API adresi
+        url = "https://openrouter.ai/api/v1/chat/completions"
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
         prompt = f"""
         Şu anki hava durumu verileri:
         - Sıcaklık: {temperature}°C
@@ -276,17 +281,34 @@ def get_ai_comment(temperature, humidity, precipitation):
         
         Lütfen bu havaya göre bir insana 2-3 cümlelik samimi, motive edici bir yorum yap. 
         Aynı zamanda bu havada ne giyilmesi gerektiğiyle ilgili (örneğin: "Bugün hafif bir hırka yeterli olur" gibi) çok kısa bir kıyafet önerisi ekle. 
-        Yanıtın toplamda 40 kelimeyi geçmesin.
+        Yanıtın toplamda 40 kelimeyi geçmesin. Sadece yorumu yaz.
         """
-    
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-        )
-        return response.text
+        
+        
+        payload = {
+            "model": "google/gemma-4-31b-it:free", 
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 150
+        }
+        
+        
+        response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
+        
+        # Hata kontrolü (401, 402, 429 gibi durumlar için)
+        if response.status_code != 200:
+            print(f"OpenRouter HTTP Hatası: {response.status_code} - {response.text}")
+            return "Şu an hava durumu yorumu alınamıyor."
+            
+        data = response.json()
+        
+        # Gelen cevabı ayıkla
+        return data['choices'][0]['message']['content'].strip()
+        
     except Exception as e:
-        print("GEMINI HATASI:", repr(e))
-        return f"Gemini hatası: {str(e)}"
+        print("OpenRouter Fonksiyon Hatası:", repr(e))
+        return "Şu an hava durumu yorumu alınamıyor."
 
 
     
