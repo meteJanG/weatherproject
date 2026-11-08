@@ -256,59 +256,66 @@ def save_merged_data(city_name):
     print(f"[{city_name}] {saved_count} adet birleştirilmiş veri kaydedildi.")
     return saved_count
 
+
 def get_ai_comment(temperature, humidity, precipitation):
+    # Anahtarın adını OpenRouter olarak değiştirdik
     api_key = os.getenv("OPENROUTER_API_KEY")
     
     if not api_key:
         return "AI yorumu için OpenRouter API anahtarı bulunamadı."
     
     try:
+        # OpenRouter API adresi
         url = "https://openrouter.ai/api/v1/chat/completions"
+        
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
         
-        # PROMPT'U ÇOK DAHA DETAYLI HALE GETİRDİK
         prompt = f"""
         Sen Climora adında, kullanıcılara hava durumuna göre akıllıca tavsiyeler veren, samimi ve pozitif bir hava durumu asistanısın.
-        Şu anki hava verileri şöyle:
-        - Sıcaklık: {temperature}°C
-        - Nem: %{humidity}
-        - Yağış İhtimali: %{precipitation}
-
-        Lütfen bana 2 veya 3 cümleden oluşan, çok samimi ve motive edici bir hava durumu yorumu yaz. 
-        Bu yorumun içinde kesinlikle şunlar olsun:
-        1. Havanın nasıl hissettireceğiyle ilgili kısa bir analiz.
-        2. Bu havaya uygun, pratik bir kıyafet önerisi (örneğin "üzerine ince bir hırka almalısın" gibi).
+                Şu anki hava verileri şöyle:
+                - Sıcaklık: {temperature}°C
+                - Nem: %{humidity}
+                - Yağış İhtimali: %{precipitation}
         
-        Kurallar:
-        - Asla yarım cümle bırakma, cümlelerini mutlaka tamamla.
-        - Robotik bir dil kullanma, bir arkadaşınla konuşuyormuş gibi doğal ol.
-        - Cevabın toplamda 40 kelimeyi geçmesin.
-        """
+                Lütfen bana 2 veya 3 cümleden oluşan, çok samimi ve motive edici bir hava durumu yorumu yaz. 
+                Bu yorumun içinde kesinlikle şunlar olsun:
+                1. Havanın nasıl hissettireceğiyle ilgili kısa bir analiz.
+                2. Bu havaya uygun, pratik bir kıyafet önerisi (örneğin "üzerine ince bir hırka almalısın" gibi).
+                
+                Kurallar:
+                - Asla yarım cümle bırakma, cümlelerini mutlaka tamamla.
+                - Robotik bir dil kullanma, bir arkadaşınla konuşuyormuş gibi doğal ol.
+                - Cevabın toplamda 40 kelimeyi geçmesin.
+                """
+        
         
         payload = {
-            # Daha stabil çalışan bir ücretsiz model kullanıyoruz
-            "model": "openrouter/free", 
+            "model": "openrouter/free",
             "messages": [
                 {"role": "user", "content": prompt}
             ],
-            # KESİLMEYİ ÖNLEMEK İÇİN TOKEN LİMİTİNİ ARTIRDIK
-            "max_tokens": 300 
+            "max_tokens": 150
         }
+        
         
         response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
         
+        # Hata kontrolü (401, 402, 429 gibi durumlar için)
         if response.status_code != 200:
             print(f"OpenRouter HTTP Hatası: {response.status_code} - {response.text}")
             return "Şu an hava durumu yorumu alınamıyor."
             
         data = response.json()
+        
+        # Gelen cevabı ayıkla
         return data['choices'][0]['message']['content'].strip()
         
     except Exception as e:
         print("OpenRouter Fonksiyon Hatası:", repr(e))
         return "Şu an hava durumu yorumu alınamıyor."
+
 
     
