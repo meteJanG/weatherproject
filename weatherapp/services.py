@@ -8,6 +8,7 @@ from django.utils import timezone
 from .models import HourlyForecast, MergedForecast
 from google.genai.errors import APIError
 
+
 def hesapla_konfor(sicaklik, nem, ruzgar):
     puan = 100
     if sicaklik < 10:
