@@ -286,7 +286,7 @@ def get_ai_comment(temperature, humidity, precipitation):
         
         
         payload = {
-            "model": "google/gemma-4-31b-it:free", 
+            "model": "openrouter/free",
             "messages": [
                 {"role": "user", "content": prompt}
             ],
