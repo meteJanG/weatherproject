@@ -322,10 +322,15 @@ def get_ai_comment(temperature, humidity, precipitation):
         print("Groq API Hatası:", repr(e))
         return "Şu an hava durumu yorumu alınamıyor."
 
+
 def generate_pixel_outfit(prompt_text):
+    # Pixel art görünümü için stil belirteçleri
     full_prompt = f"{prompt_text}, full body shot, flat colors, 16-bit pixel art style, solid background"
     encoded_prompt = urllib.parse.quote(full_prompt)
+    
     seed = random.randint(1, 100000)
-    # Anahtarsız endpoint deniyoruz
-    image_url = f"https://gen.pollinations.ai/image/{encoded_prompt}?width=512&height=512&seed={seed}"
+    
+    # Anahtarsız ücretsiz endpoint
+    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=512&height=512&model=flux&seed={seed}&nologo=true"
+    
     return image_url
