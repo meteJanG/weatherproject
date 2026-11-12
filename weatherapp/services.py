@@ -9,6 +9,8 @@ from .models import HourlyForecast, MergedForecast
 from google.genai.errors import APIError
 from openai import OpenAI
 import urllib.parse
+import random
+
 
 
 
@@ -320,6 +322,20 @@ def get_ai_comment(temperature, humidity, precipitation):
         print("Groq API Hatası:", repr(e))
         return "Şu an hava durumu yorumu alınamıyor."
 
-
-
-import urllib.parse
+def generate_pixel_outfit(prompt_text):
+    # Pixel art görünümünü zorlamak için stil belirteçleri ekliyoruz
+    full_prompt = f"{prompt_text}, cozy pixel art, 8-bit aesthetic, chunky sprites, soft lighting, retro game style, flat colors, pixelated"
+    
+    # Prompt'u URL için güvenli hale getir
+    encoded_prompt = urllib.parse.quote(full_prompt)
+    
+    # Çözünürlüğü düşük tutuyoruz ki pikseller belirgin olsun
+    width = 256
+    height = 256
+    
+    # Rastgele bir seed ekleyerek her seferinde farklı bir görsel gelmesini sağlıyoruz
+    seed = random.randint(1, 100000)
+    
+    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&nologo=true&seed={seed}"
+    
+    return image_url
