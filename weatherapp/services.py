@@ -323,19 +323,22 @@ def get_ai_comment(temperature, humidity, precipitation):
         return "Şu an hava durumu yorumu alınamıyor."
 
 def generate_pixel_outfit(prompt_text):
-    # Pixel art görünümünü zorlamak için stil belirteçleri ekliyoruz
-    full_prompt = f"{prompt_text}, cozy pixel art, 8-bit aesthetic, chunky sprites, soft lighting, retro game style, flat colors, pixelated"
+    # Anahtarı .env'den al
+    api_key = os.getenv("POLLINATIONS_API_KEY")
+    if not api_key:
+        print("Pollinations API anahtarı bulunamadı!")
+        return None
+
+    # Pixel art görünümünü zorlamak için stil belirteçleri
+    full_prompt = f"{prompt_text}, full body shot, standing straight, flat colors, 16-bit pixel art style, clear outfit details, solid background"
     
-    # Prompt'u URL için güvenli hale getir
     encoded_prompt = urllib.parse.quote(full_prompt)
     
-    # Çözünürlüğü düşük tutuyoruz ki pikseller belirgin olsun
-    width = 256
-    height = 256
-    
-    # Rastgele bir seed ekleyerek her seferinde farklı bir görsel gelmesini sağlıyoruz
+    width = 512
+    height = 512
     seed = random.randint(1, 100000)
     
-    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&nologo=true&seed={seed}"
+    # YENİ ADRES: gen.pollinations.ai ve anahtarı URL'e ekliyoruz
+    image_url = f"https://gen.pollinations.ai/image/{encoded_prompt}?width={width}&height={height}&seed={seed}&key={api_key}"
     
     return image_url
