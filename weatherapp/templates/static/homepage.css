@@ -604,86 +604,68 @@ body.rainy .rain-container {
     opacity: 0.9;
 }
 
+/* =========================================
+   MOBİL UYUMLULUK (TELEFONLAR İÇİN)
+   ========================================= */
 @media (max-width: 768px) {
-    .bento-grid {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .main-box {
-        grid-column: unset;
-    }
-
-    .side-box {
-        grid-column: unset;
-        grid-row: unset;
-    }
-
-    .bento-grid > .box {
-        width: 100%;
-    }
-}
-
-/* Yükleme Animasyonu (Spinner) */
-.spinner {
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border-left-color: #4A90E2; /* Site rengin */
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.kombin-resmi {
-    width: 100%;
-    max-width: 300px;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-}
-
-@media (max-width: 768px) {
-    /* 1. Scroll Sorununu Çöz (Ekrana tam sığdır) */
+    /* 1. Sayfanın kaymasına izin ver, sadece yatay kaymayı engelle */
     html, body {
-        height: 100vh;
-        overflow: hidden; /* Aşağı kaydırmayı engelle */
-        padding: 0;
-        margin: 0;
+        height: auto;
+        min-height: 100vh;
+        overflow-x: hidden;
+        overflow-y: auto; 
     }
 
-    /* 2. Tüm İçeriği Sığdırmak İçin Ölçeklendir */
-    .dashboard-wrapper {
-        width: 100%;
-        height: 100%;
+    body {
         padding: 10px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        box-sizing: border-box;
+        align-items: center;
     }
 
-    /* 3. Izgarayı (Grid) Mobil İçin Tek Sütuna Düşür */
+    /* 2. Logoyu ve Arama Çubuğunu Düzenle */
+    .logo-container {
+        position: relative;
+        top: 0;
+        left: 0;
+        margin-bottom: 15px;
+        align-self: flex-start;
+    }
+
+    .site-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .search-container {
+        margin-top: 0;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* 3. Ana Kapsayıcıyı Ayarla */
+    .dashboard-wrapper {
+        width: 100%;
+        padding: 0;
+    }
+
     .bento-grid {
         display: flex;
         flex-direction: column;
-        gap: 10px;
-        height: 100%;
-        overflow-y: hidden; /* İçeride de scroll istemiyoruz */
+        gap: 15px;
+        width: 100%;
     }
 
-    /* 4. Kutuların Boyutlarını Küçült */
+    /* 4. Kutuların İç Boşluklarını Küçült */
     .box {
-        padding: 15px;
-        border-radius: 16px;
+        padding: 20px;
+        border-radius: 20px;
+        width: 100%;
     }
 
     .main-box {
-        padding: 20px 15px;
+        padding: 20px;
     }
 
     .city-name {
@@ -695,8 +677,8 @@ body.rainy .rain-container {
     }
 
     .ai-comment-section {
-        margin-top: 10px;
-        padding: 10px;
+        margin-top: 15px;
+        padding: 15px;
     }
     
     .ai-comment {
@@ -704,101 +686,94 @@ body.rainy .rain-container {
         line-height: 1.4;
     }
 
-    /* 5. Detay Kutularını Yan Yana Getir (Nem, Rüzgar vb.) */
+    /* 5. Detay Kutularını Yan Yana Getir */
     .detail-box {
-        display: inline-flex;
-        width: calc(50% - 5px); /* İki tanesi yan yana sığsın */
-        height: auto;
-        padding: 15px 5px;
-    }
-
-    /* Kutuları saran yapıyı flex yap ki yan yana dursunlar */
-    .bento-grid > .detail-box:nth-child(2),
-    .bento-grid > .detail-box:nth-child(3) {
-        margin-right: 10px;
+        padding: 15px 10px;
     }
 
     .label {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
     }
     
     .value {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
     }
 
-    /* Kıyafet butonunu mobilde küçült */
     .button {
-        font-size: 2rem;
+        font-size: 2.5rem;
     }
     
     .badge-yeni {
         font-size: 0.7rem;
-        padding: 2px 4px;
+        padding: 2px 5px;
     }
 
-    /* 6. Sağdaki Saatlik ve Spotify Kutusu */
+    /* 6. Yan Panel (Saatler ve Spotify) */
     .side-box {
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
         height: auto;
+        padding: 20px;
     }
 
     .side-box h3 {
-        font-size: 1rem;
-        margin-bottom: 10px;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
     }
 
+    /* Saatlikleri yatay kaydırılabilir yapalım ki yer kaplamasın */
     .hourly-forecast {
         display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 10px;
+        padding-bottom: 10px; /* Scroll çubuğu için yer */
+        margin-bottom: 15px;
+    }
+
+    /* Scroll çubuğunu gizle (şık dursun diye) */
+    .hourly-forecast::-webkit-scrollbar {
+        display: none;
     }
 
     .hour-item {
-        width: calc(33.33% - 5px); /* 3'lü yan yana */
-        padding: 8px;
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 15px;
         margin-bottom: 0;
+        min-width: 70px;
     }
 
     .hour-label, .hour-temp {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
     }
 
-    /* Spotify kısmını biraz daha kompakt yap */
+    .hour-temp {
+        margin-top: 5px;
+    }
+
+    /* Spotify Kısmını Küçült */
     .spotify-widget {
-        padding: 10px;
-        margin-top: 10px;
+        padding: 15px;
     }
 
     .spotify-cover {
-        width: 80px;
-        height: 80px;
-        margin-bottom: 5px;
+        width: 100px;
+        height: 100px;
     }
 
     .spotify-title {
-        font-size: 0.8rem;
-        margin-bottom: 5px;
+        font-size: 0.9rem;
     }
 
     .spotify-link-btn {
-        padding: 8px 15px;
+        padding: 8px 20px;
         font-size: 0.8rem;
     }
-    
-    /* Logo ve Arama kısmını biraz daha yukarı çek */
-    .logo-container {
-        top: 15px;
-        left: 15px;
-    }
-    .site-logo {
-        width: 45px;
-        height: 45px;
-    }
-    
-    .search-container {
-        margin-bottom: 15px;
-        margin-top: 50px; /* Logonun altına insin diye */
+
+    /* Popup'ı mobilde daha iyi hizala */
+    .popup-content {
+        width: 95%;
+        padding: 20px;
     }
 }
