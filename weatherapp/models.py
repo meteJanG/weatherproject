@@ -20,6 +20,8 @@ class MergedForecast(models.Model):
     precipitation_chance = models.FloatField(null=True, blank=True)
     source_info = models.CharField(max_length=50, default="avg") # 'avg', 'openmeteo' vs.
     wind_speed = models.FloatField(null=True, blank=True)
+    condition = models.CharField(max_length=50, null=True, blank=True) # Örn: "Rain", "Clear", "Snow"
+
 
     
     class Meta:

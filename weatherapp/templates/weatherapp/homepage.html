@@ -41,8 +41,8 @@
 
             <div class="box main-box">
                 <div class="main-header">
-                    <h2 class="city-name">{{ aranan_sehir }}</h2>
-                    <h1 class="temperature">{{ hava.temperature|floatformat:1 }}°C</h1>
+                    <h2 class="city-name">{{ aranan_sehir }} {{ hava_emoji }}</h2>
+                    <h1 class="temperature">{{ hava.temperature|floatformat:1 }}°C {{ hava_emoji }}</h1>
                 </div>
                 <div class="ai-comment-section">
                     {% if ai_yorumu %}

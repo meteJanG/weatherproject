@@ -9,18 +9,28 @@ from .models import HourlyForecast, MergedForecast
 from google.genai.errors import APIError
 
 
-def hesapla_konfor(sicaklik, nem, ruzgar):
+def hesapla_konfor(sicaklik, nem, ruzgar, yagis_ihtimali=0):
     puan = 100
-    if sicaklik < 10:
-        puan -= (10 - sicaklik) * 3
-    elif sicaklik > 28:
-        puan -= (sicaklik - 28) * 3
+    
+    # 1. Sıcaklık Cezası (İdeal: 20-24°C)
+    if sicaklik < 18:
+        puan -= (18 - sicaklik) * 2.5 
+    elif sicaklik > 26:
+        puan -= (sicaklik - 26) * 3.0 
+        
     if nem < 30:
-        puan -= (30 - nem) * 0.5
+        puan -= (30 - nem) * 0.3 
     elif nem > 60:
-        puan -= (nem - 60) * 0.5
+        puan -= (nem - 60) * 0.6 
+        
+    # 3. Rüzgar Cezası (İdeal: 0 - 15 km/h)
     if ruzgar > 15:
-        puan -= (ruzgar - 15) * 1
+        puan -= (ruzgar - 15) * 1.5 # Rüzgar, özellikle soğukta üşütür
+        
+    # 4. Yağış Cezası (İdeal: %0)
+    if yagis_ihtimali > 20:
+        puan -= (yagis_ihtimali / 100) * 15 # Yağmur, konforu ciddi bozar
+        
     return max(0, min(100, int(puan)))
 
 def fetch_om_data(city_name, lat, lon):
@@ -257,66 +267,49 @@ def save_merged_data(city_name):
     print(f"[{city_name}] {saved_count} adet birleştirilmiş veri kaydedildi.")
     return saved_count
 
-
 def get_ai_comment(temperature, humidity, precipitation):
-    # Anahtarın adını OpenRouter olarak değiştirdik
-    api_key = os.getenv("OPENROUTER_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     
     if not api_key:
-        return "AI yorumu için OpenRouter API anahtarı bulunamadı."
+        return "AI yorumu için Groq API anahtarı bulunamadı."
     
     try:
-        # OpenRouter API adresi
-        url = "https://openrouter.ai/api/v1/chat/completions"
-        
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
+        # Groq, OpenAI kütüphanesi ile çalışır. Sadece base_url'i değiştiriyoruz.
+        client = OpenAI(
+            base_url="https://api.groq.com/openai/v1",
+            api_key=api_key
+        )
         
         prompt = f"""
         Sen Climora adında, kullanıcılara hava durumuna göre akıllıca tavsiyeler veren, samimi ve pozitif bir hava durumu asistanısın.
-                Şu anki hava verileri şöyle:
-                - Sıcaklık: {temperature}°C
-                - Nem: %{humidity}
-                - Yağış İhtimali: %{precipitation}
+        Şu anki hava verileri şöyle:
+        - Sıcaklık: {temperature}°C
+        - Nem: %{humidity}
+        - Yağış İhtimali: %{precipitation}
+
+        Lütfen bana 2 veya 3 cümleden oluşan, çok samimi ve motive edici bir hava durumu yorumu yaz. 
+        Bu yorumun içinde kesinlikle şunlar olsun:
+        1. Havanın nasıl hissettireceğiyle ilgili kısa bir analiz.
+        2. Bu havaya uygun, pratik bir kıyafet önerisi.
         
-                Lütfen bana 2 veya 3 cümleden oluşan, çok samimi ve motive edici bir hava durumu yorumu yaz. 
-                Bu yorumun içinde kesinlikle şunlar olsun:
-                1. Havanın nasıl hissettireceğiyle ilgili kısa bir analiz.
-                2. Bu havaya uygun, pratik bir kıyafet önerisi (örneğin "üzerine ince bir hırka almalısın" gibi).
-                
-                Kurallar:
-                - Asla yarım cümle bırakma, cümlelerini mutlaka tamamla.
-                - Robotik bir dil kullanma, bir arkadaşınla konuşuyormuş gibi doğal ol.
-                - Cevabın toplamda 40 kelimeyi geçmesin.
-                """
+        Kurallar:
+        - Asla yarım cümle bırakma.
+        - Robotik bir dil kullanma.
+        - Cevabın toplamda 40 kelimeyi geçmesin.
+        """
         
-        
-        payload = {
-            "model": "openrouter/free",
-            "messages": [
+        # Groq'un hızlı ve ücretsiz modellerinden biri
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",  # veya "openai/gpt-oss-120b"
+            messages=[
                 {"role": "user", "content": prompt}
             ],
-            "max_tokens": 150
-        }
+            max_tokens=150,
+            temperature=0.7
+        )
         
-        
-        response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
-        
-        # Hata kontrolü (401, 402, 429 gibi durumlar için)
-        if response.status_code != 200:
-            print(f"OpenRouter HTTP Hatası: {response.status_code} - {response.text}")
-            return "Şu an hava durumu yorumu alınamıyor."
-            
-        data = response.json()
-        
-        # Gelen cevabı ayıkla
-        return data['choices'][0]['message']['content'].strip()
+        return response.choices[0].message.content.strip()
         
     except Exception as e:
-        print("OpenRouter Fonksiyon Hatası:", repr(e))
+        print("Groq API Hatası:", repr(e))
         return "Şu an hava durumu yorumu alınamıyor."
-
-
-    
