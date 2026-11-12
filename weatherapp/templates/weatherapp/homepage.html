@@ -111,20 +111,16 @@
             <h2>Günün Kıyafet Asistanı</h2>
             <p class="popup-subtitle">Hava durumuna uygun AI pixel art kombini</p>
 
-            <!-- AI Görselinin veya Butonun Gösterileceği Alan -->
             <div id="kombin-alani">
-                <!-- Başlangıçta Buton Görünür -->
                 <button type="button" class="analyze-btn" id="generateKombinBtn" style="width: 100%;">
                     ✨ Kombinini Oluştur
                 </button>
 
-                <!-- Yükleme Ekranı (Başlangıçta Gizli) -->
                 <div id="loading-alani" style="display: none; text-align: center; padding: 20px;">
                     <div class="spinner"></div>
                     <p style="margin-top: 10px; color: #ccc;">Kombinin hazırlanıyor, lütfen bekle...</p>
                 </div>
 
-                <!-- Oluşan Görsel (Başlangıçta Gizli) -->
                 <div id="gorsel-alani" style="display: none; text-align: center;">
                     <img id="kombin-gorsel" src="" alt="Kombin Önerisi" class="kombin-resmi">
                     <button type="button" class="retake-btn" id="tekrar-olustur-btn" style="margin-top: 15px;">
@@ -135,7 +131,6 @@
         </div>
     </div>
 
-    <!-- 2. SORU İŞARETİ AÇIKLAMA POP-UP'I -->
     <div class="popup-overlay" id="helpPopup">
         <div class="popup-content">
             <button class="close-btn" id="closeHelpPopupBtn">&times;</button>
@@ -151,11 +146,32 @@
         </div>
     </div>
 
-    <!-- SCRIPT DOSYASI EN ALTA TAŞINDI -->
     <script src="{% static 'script.js' %}"></script>
 
-    <!-- Diğer inline scriptler -->
     <script>
+        // --- ARKA PLAN DEĞİŞTİRME KODU ---
+        function setWeatherBackground() {
+            const now = new Date();
+            let hour = now.getHours();
+            let formattedHour = hour.toString().padStart(2, '0');
+            
+            // Django'nun statik dosya yolunu kullanarak resim yolunu oluştur
+            const imagePath = "{% static 'weatherfotos/' %}" + formattedHour + ".jpeg";
+            
+            const bgElement = document.getElementById('dynamic-bg');
+            if (bgElement) {
+                bgElement.style.backgroundImage = `url('${imagePath}')`;
+                console.log("Arka plan ayarlandı:", imagePath); // Konsolda kontrol için
+            }
+        }
+        
+        // Sayfa yüklendiğinde çalıştır
+        setWeatherBackground();
+        
+        // Her 15 dakikada bir (900000 ms) saati kontrol edip arka planı güncelle
+        setInterval(setWeatherBackground, 900000);
+        // --- ARKA PLAN KODU SONU ---
+
         // --- KIYAFET ÖNERİSİ (PIXEL ART) JAVASCRIPT KODU ---
         document.addEventListener("DOMContentLoaded", function () {
             const generateBtn = document.getElementById("generateKombinBtn");
@@ -167,29 +183,24 @@
             const outfitPopup = document.getElementById("outfitPopup");
             const openPopupBtn = document.getElementById("openPopupBtn");
 
-            // Django'dan gelen görsel URL'ini alıyoruz
             const aiGorselUrl = "{{ pixel_gorsel_url|default:'' }}";
 
-            // Popup'ı Açan Buton (Bunu HTML'de id="openPopupBtn" olarak ayarlamıştık)
             if (openPopupBtn) {
                 openPopupBtn.addEventListener("click", function () {
                     outfitPopup.classList.add("active");
                 });
             }
 
-            // Görseli Gösterme Fonksiyonu
             function gorseliGoster() {
                 if (!aiGorselUrl) {
                     alert("Görsel henüz oluşturulamadı. Lütfen sayfayı yenileyin.");
                     return;
                 }
 
-                // Butonu gizle, yüklemeyi göster
                 generateBtn.style.display = "none";
                 gorselAlan.style.display = "none";
                 loadingAlan.style.display = "block";
 
-                // Resmi arka planda yükle
                 const img = new Image();
                 img.onload = function () {
                     kombinGorsel.src = aiGorselUrl;
@@ -202,23 +213,19 @@
                     alert("Görsel yüklenirken bir sorun oluştu. Lütfen tekrar deneyin.");
                 };
 
-                // Resmi yüklemeye başla
                 img.src = aiGorselUrl;
             }
 
-            // "Kombinini Oluştur" butonuna basıldığında
             if (generateBtn) {
                 generateBtn.addEventListener("click", gorseliGoster);
             }
 
-            // "Yeniden Oluştur" butonuna basıldığında sayfayı yenile (yeni görsel için)
             if (tekrarBtn) {
                 tekrarBtn.addEventListener("click", function () {
                     window.location.reload();
                 });
             }
 
-            // Popup kapandığında her şeyi sıfırla
             if (closePopupBtn) {
                 closePopupBtn.addEventListener("click", function () {
                     outfitPopup.classList.remove("active");
@@ -228,7 +235,6 @@
                 });
             }
 
-            // Popup dışına tıklanınca kapanması için
             if (outfitPopup) {
                 outfitPopup.addEventListener("click", function (e) {
                     if (e.target === outfitPopup) {
