@@ -302,15 +302,16 @@ def get_ai_comment(temperature, humidity, precipitation):
         
         # Groq'un hızlı ve ücretsiz modellerinden biri
         response = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="openai/gpt-oss-20b",
             messages=[
                 {"role": "user", "content": prompt}
             ],
             max_tokens=150,
             temperature=0.7
         )
-        
+        print("GROQ CEVABI:", response.choices[0].message.content)
         return response.choices[0].message.content.strip()
+
         
     except Exception as e:
         print("Groq API Hatası:", repr(e))
