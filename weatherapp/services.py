@@ -302,7 +302,7 @@ def get_ai_comment(temperature, humidity, precipitation):
         
         # Groq'un hızlı ve ücretsiz modellerinden biri
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",  # veya "openai/gpt-oss-120b"
+            model="openai/gpt-oss-20b",
             messages=[
                 {"role": "user", "content": prompt}
             ],
