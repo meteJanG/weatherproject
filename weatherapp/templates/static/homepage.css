@@ -63,18 +63,18 @@ body {
 }
 
 .popup-content {
-    background: rgba(30, 35, 45, 0.75); /* Sitedeki diğer kutuların arka plan tonu */
-    border: 1px solid rgba(255, 255, 255, 0.1); /* Hafif şeffaf kenarlık */
+    background: rgba(30, 35, 45, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     padding: 30px;
-    width: 400px;
-    max-width: 90%;
+    width: 90%;
+    max-width: 400px;
+    max-height: 90vh; /* Ekran yüksekliğinin %90'ını geçmesin */
+    overflow-y: auto; /* İçerik taşarsa kendi içinde kaydırma çubuğu çıksın */
     border-radius: 20px;
     color: #fff;
     position: relative;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-    
-    /* Açılış animasyonu için küçük bir efekt */
     transform: translateY(20px);
     transition: transform 0.3s ease;
 }
@@ -603,3 +603,13 @@ body.rainy .rain-container {
     opacity: 0.9;
 }
 
+.kombin-resmi {
+    width: 100%;
+    max-width: 280px; /* Genişliği biraz daralttık */
+    max-height: 400px; /* Yüksekliğe de sınır koyduk */
+    object-fit: contain; /* Görselin oranını bozmadan sığdırır */
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    display: block;
+    margin: 0 auto; /* Ortala */
+}
