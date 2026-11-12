@@ -7,6 +7,8 @@ from datetime import datetime, timezone as dt_timezone
 from django.utils import timezone
 from .models import HourlyForecast, MergedForecast
 from google.genai.errors import APIError
+from openai import OpenAI
+
 
 
 def hesapla_konfor(sicaklik, nem, ruzgar, yagis_ihtimali=0):
