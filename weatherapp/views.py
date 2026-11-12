@@ -5,7 +5,8 @@ from .services import (
     fetch_ow_current, 
     save_merged_data, 
     get_ai_comment, 
-    hesapla_konfor
+    hesapla_konfor,
+    generate_pixel_outfit
 )
 from .sposervices import get_playlist
 from .models import MergedForecast
@@ -16,7 +17,7 @@ CITY_COORDINATES = {
     "İzmir": (38.41, 27.12),
 }
 
-# Emoji Seçici Fonksiyon (Şimdilik sadece sıcaklığa bakarak tahmin yürütüyor)
+# Emoji Seçici Fonksiyon
 def get_weather_emoji(condition):
     if not condition:
         return "🌡️"
@@ -56,7 +57,8 @@ def home_page(request):
     konfor_puani = 0
     spotify_sarki = None
     ruzgar = 0
-    hava_emoji = "🌡️" # Varsayılan emoji
+    hava_emoji = "🌡️"
+    pixel_gorsel_url = None # <--- Varsayılan olarak boş tanımladık
     
     if anlik_veri:
         temp = anlik_veri.temperature or 0
@@ -64,10 +66,8 @@ def home_page(request):
         precip = anlik_veri.precipitation_chance or 0
         ruzgar = anlik_veri.wind_speed or 0
         
-        # Condition verisi modelde varsa onu kullan, yoksa sıcaklığa göre tahmin et
         condition = getattr(anlik_veri, 'condition', None)
         if not condition:
-            # Eğer condition verisi yoksa, sıcaklığa göre bir tahmin yürütelim
             if precip > 50: condition = "Rain"
             elif temp < 0: condition = "Snow"
             elif temp > 25: condition = "Clear"
@@ -79,6 +79,21 @@ def home_page(request):
         konfor_puani = hesapla_konfor(temp, hum, ruzgar, precip)
         spotify_sarki = get_playlist(temp)
 
+        # --- PIXEL ART KOMBİN MANTIĞI ---
+        if temp < 5:
+            outfit_prompt = "a person wearing a thick winter coat, scarf, and beanie"
+        elif temp < 15:
+            outfit_prompt = "a person wearing a stylish jacket, jeans, and sneakers"
+        elif temp < 22:
+            outfit_prompt = "a person wearing a light long-sleeve shirt and chinos"
+        else:
+            outfit_prompt = "a person wearing a light t-shirt and shorts in a sunny park"
+
+        if precip > 40:
+            outfit_prompt += ", holding a colorful umbrella"
+
+        pixel_gorsel_url = generate_pixel_outfit(outfit_prompt)
+
     context = {
         'hava': anlik_veri,
         'gelecek_saatler': gelecek_saatler,
@@ -87,7 +102,8 @@ def home_page(request):
         'konfor_puani': konfor_puani,
         'ruzgar': ruzgar,
         'sarki': spotify_sarki,
-        'hava_emoji': hava_emoji, # <--- EMOJİYİ HTML'E GÖNDERİYORUZ
+        'hava_emoji': hava_emoji,
+        'pixel_gorsel_url': pixel_gorsel_url, # <--- HTML'E GÖNDERİYORUZ
     }
     
     return render(request, 'weatherapp/homepage.html', context)

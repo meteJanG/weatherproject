@@ -8,6 +8,8 @@ from django.utils import timezone
 from .models import HourlyForecast, MergedForecast
 from google.genai.errors import APIError
 from openai import OpenAI
+import urllib.parse
+
 
 
 
@@ -317,3 +319,7 @@ def get_ai_comment(temperature, humidity, precipitation):
     except Exception as e:
         print("Groq API Hatası:", repr(e))
         return "Şu an hava durumu yorumu alınamıyor."
+
+
+
+import urllib.parse

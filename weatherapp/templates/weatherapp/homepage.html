@@ -109,21 +109,29 @@
         <div class="popup-content">
             <button class="close-btn" id="closePopupBtn">&times;</button>
             <h2>Günün Kıyafet Asistanı</h2>
-            <p class="popup-subtitle">Hava durumuna uygun AI kombini analizi</p>
+            <p class="popup-subtitle">Hava durumuna uygun AI pixel art kombini</p>
 
-            <div class="upload-container" id="uploadContainer">
-                <input type="file" id="outfitInput" accept="image/*" capture="environment" style="display: none;">
-                <div class="upload-placeholder" id="uploadPlaceholder">
-                    <span class="plus-icon">＋</span>
-                    <p>Kıyafetinin Fotoğrafını Çek / Yükle</p>
+            <!-- AI Görselinin veya Butonun Gösterileceği Alan -->
+            <div id="kombin-alani">
+                <!-- Başlangıçta Buton Görünür -->
+                <button type="button" class="analyze-btn" id="generateKombinBtn" style="width: 100%;">
+                    ✨ Kombinini Oluştur
+                </button>
+
+                <!-- Yükleme Ekranı (Başlangıçta Gizli) -->
+                <div id="loading-alani" style="display: none; text-align: center; padding: 20px;">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px; color: #ccc;">Kombinin hazırlanıyor, lütfen bekle...</p>
                 </div>
-                <div class="preview-container" id="previewContainer" style="display: none;">
-                    <img id="outfitPreview" alt="Kıyafet Önizlemesi">
-                    <button type="button" id="retakeBtn" class="retake-btn">Yeniden Çek</button>
+
+                <!-- Oluşan Görsel (Başlangıçta Gizli) -->
+                <div id="gorsel-alani" style="display: none; text-align: center;">
+                    <img id="kombin-gorsel" src="" alt="Kombin Önerisi" class="kombin-resmi">
+                    <button type="button" class="retake-btn" id="tekrar-olustur-btn" style="margin-top: 15px;">
+                        🔄 Yeniden Oluştur
+                    </button>
                 </div>
             </div>
-
-            <button type="button" class="analyze-btn" id="analyzeBtn" disabled>Kıyafeti Kaydet</button>
         </div>
     </div>
 
@@ -148,67 +156,91 @@
 
     <!-- Diğer inline scriptler -->
     <script>
+        // --- KIYAFET ÖNERİSİ (PIXEL ART) JAVASCRIPT KODU ---
         document.addEventListener("DOMContentLoaded", function () {
-            if (document.body.classList.contains('rainy')) {
-                var frontRow = document.querySelector('.rain.front-row');
-                var backRow = document.querySelector('.rain.back-row');
-                var increment = 0;
-                var drops = "";
-                var backDrops = "";
+            const generateBtn = document.getElementById("generateKombinBtn");
+            const loadingAlan = document.getElementById("loading-alani");
+            const gorselAlan = document.getElementById("gorsel-alani");
+            const kombinGorsel = document.getElementById("kombin-gorsel");
+            const tekrarBtn = document.getElementById("tekrar-olustur-btn");
+            const closePopupBtn = document.getElementById("closePopupBtn");
+            const outfitPopup = document.getElementById("outfitPopup");
+            const openPopupBtn = document.getElementById("openPopupBtn");
 
-                while (increment < 100) {
-                    var randoHundo = (Math.floor(Math.random() * (98 - 1 + 1) + 1));
-                    var randoFiver = (Math.floor(Math.random() * (5 - 2 + 1) + 2));
-                    increment += randoFiver;
+            // Django'dan gelen görsel URL'ini alıyoruz
+            const aiGorselUrl = "{{ pixel_gorsel_url|default:'' }}";
 
-                    var styleStr = 'left: ' + increment + '%; bottom: ' + (randoFiver + randoFiver - 1 + 100) + '%; animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;';
-                    var dropHtml = '<div class="drop" style="' + styleStr + '"><div class="stem" style="animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"></div><div class="splat" style="animation-delay: 0.' + randoHundo + 's; animation-duration: 0.5' + randoHundo + 's;"></div></div>';
+            // Popup'ı Açan Buton (Bunu HTML'de id="openPopupBtn" olarak ayarlamıştık)
+            if (openPopupBtn) {
+                openPopupBtn.addEventListener("click", function () {
+                    outfitPopup.classList.add("active");
+                });
+            }
 
-                    drops += dropHtml;
-                    backDrops += dropHtml;
+            // Görseli Gösterme Fonksiyonu
+            function gorseliGoster() {
+                if (!aiGorselUrl) {
+                    alert("Görsel henüz oluşturulamadı. Lütfen sayfayı yenileyin.");
+                    return;
                 }
-                if (frontRow) frontRow.innerHTML = drops;
-                if (backRow) backRow.innerHTML = backDrops;
+
+                // Butonu gizle, yüklemeyi göster
+                generateBtn.style.display = "none";
+                gorselAlan.style.display = "none";
+                loadingAlan.style.display = "block";
+
+                // Resmi arka planda yükle
+                const img = new Image();
+                img.onload = function () {
+                    kombinGorsel.src = aiGorselUrl;
+                    loadingAlan.style.display = "none";
+                    gorselAlan.style.display = "block";
+                };
+                img.onerror = function () {
+                    loadingAlan.style.display = "none";
+                    generateBtn.style.display = "block";
+                    alert("Görsel yüklenirken bir sorun oluştu. Lütfen tekrar deneyin.");
+                };
+
+                // Resmi yüklemeye başla
+                img.src = aiGorselUrl;
+            }
+
+            // "Kombinini Oluştur" butonuna basıldığında
+            if (generateBtn) {
+                generateBtn.addEventListener("click", gorseliGoster);
+            }
+
+            // "Yeniden Oluştur" butonuna basıldığında sayfayı yenile (yeni görsel için)
+            if (tekrarBtn) {
+                tekrarBtn.addEventListener("click", function () {
+                    window.location.reload();
+                });
+            }
+
+            // Popup kapandığında her şeyi sıfırla
+            if (closePopupBtn) {
+                closePopupBtn.addEventListener("click", function () {
+                    outfitPopup.classList.remove("active");
+                    generateBtn.style.display = "block";
+                    loadingAlan.style.display = "none";
+                    gorselAlan.style.display = "none";
+                });
+            }
+
+            // Popup dışına tıklanınca kapanması için
+            if (outfitPopup) {
+                outfitPopup.addEventListener("click", function (e) {
+                    if (e.target === outfitPopup) {
+                        outfitPopup.classList.remove("active");
+                        generateBtn.style.display = "block";
+                        loadingAlan.style.display = "none";
+                        gorselAlan.style.display = "none";
+                    }
+                });
             }
         });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register("{% static 'sw.js' %}")
-                .then((reg) => console.log('PWA Service Worker Başarılı!', reg))
-                .catch((err) => console.log('PWA Hatası:', err));
-        }
-        let kurulumEkrani;
-        const indirButonu = document.getElementById('pwa-indir-buton');
-
-        window.addEventListener('beforeinstallprompt', (olay) => {
-            olay.preventDefault();
-            kurulumEkrani = olay;
-            indirButonu.style.display = 'inline-block';
-        });
-
-        indirButonu.addEventListener('click', async () => {
-            if (kurulumEkrani !== null) {
-                kurulumEkrani.prompt();
-                const sonuc = await kurulumEkrani.userChoice;
-                if (sonuc.outcome === 'accepted') {
-                    indirButonu.style.display = 'none';
-                }
-                kurulumEkrani = null;
-            }
-        });
-
-        function setWeatherBackground() {
-            const now = new Date();
-            let hour = now.getHours();
-            let formattedHour = hour.toString().padStart(2, '0');
-            const imagePath = "{% static 'weatherfotos/' %}" + formattedHour + ".jpeg";
-            const bgElement = document.getElementById('dynamic-bg');
-            if (bgElement) {
-                bgElement.style.backgroundImage = `url('${imagePath}')`;
-            }
-        }
-        setWeatherBackground();
-        setInterval(setWeatherBackground, 900000);
+        // --- KIYAFET ÖNERİSİ JS SONU ---
     </script>
 </body>
 
