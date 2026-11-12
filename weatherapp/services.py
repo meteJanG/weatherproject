@@ -306,7 +306,8 @@ def get_ai_comment(temperature, humidity, precipitation):
             messages=[
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=150,
+            max_tokens=1000,
+            reasoning_effort="low", 
             temperature=0.7
         )
         print("GROQ CEVABI:", response.choices[0].message.content)
