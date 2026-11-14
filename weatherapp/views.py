@@ -17,7 +17,7 @@ CITY_COORDINATES = {
     "İzmir": (38.41, 27.12),
 }
 
-# Emoji Seçici Fonksiyon
+
 def get_weather_emoji(condition):
     if not condition:
         return "🌡️"
