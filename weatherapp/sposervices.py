@@ -31,7 +31,6 @@ def get_playlist(temp):
     if not token:
         return None
 
-    # Hava durumuna göre şarkı havuzları (Sen buradaki ID'leri çoğaltabilirsin)
     soguk_sarkilar = [
         "4cOdK2wGLETKBW3PvgPWqT", # Rick Astley - Never Gonna Give You Up
         "7qiZfU4dY1lWllzX7mPBI3", # Ed Sheeran - Shape of You
