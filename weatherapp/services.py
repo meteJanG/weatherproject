@@ -251,7 +251,6 @@ def save_merged_data(city_name):
         temp = row['temperature'] if row['temperature'] is not None else None
         hum = row['humidity'] if row['humidity'] is not None else None
         precip = row['precipitation'] if row['precipitation'] is not None else None
-        # Rüzgar hızını da alıyoruz (data_avg'dan gelecek)
         ruzgar = row.get('wind_speed') if row.get('wind_speed') is not None else None 
 
         defaults = {
